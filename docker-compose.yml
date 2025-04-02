@@ -16,32 +16,38 @@ services:
     environment:
       - PYTHON_CONTAINER=python-app
       - GO_CONTAINER=go-app
+    python-app:
+      image: python:3.9
+      container_name: python-app
+      command: tail -f /dev/null
+      networks:
+        - code-network
 
-  python-app:
-    build:
-      context: ./language/python
-    container_name: python-app
-    networks:
-      - code-network
-    restart: unless-stopped
-    volumes:
-      - "./language/python/app:/app"
-    healthcheck:
-      test: ["CMD", "python3", "-c", "print('OK')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
+  # python-app:
+  #   build:
+  #     context: ./language/python
+  #   container_name: python-app
+  #   networks:
+  #     - code-network
+  #   restart: unless-stopped
+  #   volumes:
+  #     - "./language/python/app:/app"
+  #   healthcheck:
+  #     test: ["CMD", "python3", "-c", "print('OK')"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 5s
 
-  go-app:
-    build:
-      context: ./language/go
-    container_name: go-app
-    networks:
-      - code-network
-    restart: unless-stopped
-    volumes:
-      - "./language/go/app:/app"
+  # go-app:
+  #   build:
+  #     context: ./language/go
+  #   container_name: go-app
+  #   networks:
+  #     - code-network
+  #   restart: unless-stopped
+  #   volumes:
+  #     - "./language/go/app:/app"
 
 networks:
   code-network:
