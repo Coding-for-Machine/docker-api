@@ -94,26 +94,24 @@ func generateFullCode(language, userCode, executeCode string, testCases []TestCa
 		builder.WriteString(userCode + "\n\n")
 
 		if len(testCases) > 0 {
-			// Test rejimi
 			builder.WriteString("if __name__ == '__main__':\n")
 			builder.WriteString("    import sys\n")
 			builder.WriteString("    if len(sys.argv) > 1 and sys.argv[1] == 'test':\n")
 
-			// Test holatlari uchun kod
 			for i, testCase := range testCases {
 				builder.WriteString(fmt.Sprintf("        # Test %d\n", i+1))
-				builder.WriteString(fmt.Sprintf("        input_values = %s\n", testCase.Input))
+				builder.WriteString(fmt.Sprintf("        input_values = '%s'\n", testCase.Input)) // String qo'shtirnoq ichida
 				builder.WriteString(fmt.Sprintf("        expected_output = %s\n", testCase.Output))
 
 				// Execute codeni test qilish uchun moslashtirish
-				testExecute := strings.ReplaceAll(executeCode, "input()", fmt.Sprintf("'%s'", testCase.Input))
+				testExecute := strings.ReplaceAll(executeCode, "input()", "input_values")
 				builder.WriteString(fmt.Sprintf("        %s\n", testExecute))
 
 				// Natijani tekshirish
 				builder.WriteString(fmt.Sprintf("        if result != expected_output:\n"))
-				builder.WriteString(fmt.Sprintf("            print(f\"Test %d failed: expected {expected_output}, got {result}\")\n", i+1))
+				builder.WriteString(fmt.Sprintf("            print('Test %d failed: expected {}, got {}'.format(expected_output, result))\n", i+1))
 				builder.WriteString(fmt.Sprintf("        else:\n"))
-				builder.WriteString(fmt.Sprintf("            print(f\"Test %d passed\")\n", i+1))
+				builder.WriteString(fmt.Sprintf("            print('Test %d passed')\n", i+1))
 			}
 		} else {
 			// Oddiy ishga tushirish rejimi
@@ -205,19 +203,22 @@ func parseTestOutput(output string, testCases []TestCase) []map[string]interface
 			"test_case": i + 1,
 			"input":     testCase.Input,
 			"expected":  testCase.Output,
-			"status":    "unknown",
+			"status":    "failed", // Default holat
 			"output":    "",
 		}
 
-		// Python uchun test natijalarini tahlil qilish
-		if strings.Contains(output, fmt.Sprintf("Test %d passed", i+1)) {
+		// Test natijalarini qidirish
+		passedPattern := fmt.Sprintf("Test %d passed", i+1)
+		failedPattern := fmt.Sprintf("Test %d failed: expected (.*), got (.*)", i+1)
+
+		if strings.Contains(output, passedPattern) {
 			result["status"] = "passed"
 			result["output"] = testCase.Output
-		} else if strings.Contains(output, fmt.Sprintf("Test %d failed", i+1)) {
-			result["status"] = "failed"
-			re := regexp.MustCompile(fmt.Sprintf(`Test %d failed: expected .+, got (.+)`, i+1))
-			if match := re.FindStringSubmatch(output); len(match) > 1 {
-				result["output"] = match[1]
+		} else if strings.Contains(output, "failed") {
+			re := regexp.MustCompile(failedPattern)
+			if matches := re.FindStringSubmatch(output); len(matches) >= 3 {
+				result["status"] = "failed"
+				result["output"] = matches[2] // Haqiqiy output
 			}
 		}
 
