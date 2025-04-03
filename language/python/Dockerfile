@@ -1,7 +1,7 @@
 FROM python:3.12
 
 WORKDIR /app/language/python
-COPY language/python/ .
+COPY . .
 
 RUN pip install -r requirements.txt
 
