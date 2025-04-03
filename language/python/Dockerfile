@@ -11,4 +11,4 @@ COPY . .
 EXPOSE 8000
 
 # Flask ilovasini Gunicorn yordamida ishga tushurish
-CMD ["gunicorn", "app:app", "-b", "0.0.0.0:8000", "--workers", "4"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
