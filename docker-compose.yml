@@ -25,7 +25,7 @@ services:
       - code-network
     restart: unless-stopped
     volumes:
-      - "./language/python/app:/app"
+      - ./language/python/solution.py:/app/solution.py
     healthcheck:
       test: ["CMD", "python3", "-c", "print('OK')"]
       interval: 30s
