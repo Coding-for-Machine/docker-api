@@ -7,4 +7,4 @@ WORKDIR /app
 COPY solution.py .
 
 # Konteyner ishga tushganda kodni ishga tushirish uchun buyruq
-CMD ["python", "solution.py"]
+CMD ["python", "./app/solution.py"]
