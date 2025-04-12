@@ -65,11 +65,24 @@ func createTarFile(fileName, content string) (*bytes.Buffer, error) {
 }
 
 func fileConnect(cli *client.Client, containerName, fileName, containerPath, content string) error {
+	// Avval eski faylni o'chirish
+	execConfig := types.ExecConfig{
+		AttachStdout: true,
+		AttachStderr: true,
+		Cmd:          []string{"rm", "-f", "/app/" + fileName},
+	}
+	execIDResp, err := cli.ContainerExecCreate(context.Background(), containerName, execConfig)
+	if err == nil {
+		cli.ContainerExecStart(context.Background(), execIDResp.ID, types.ExecStartCheck{})
+	}
+
+	// Yangi tar fayl yaratish
 	tarBuffer, err := createTarFile(fileName, content)
 	if err != nil {
 		return fmt.Errorf("Tar fayl yaratishda xatolik: %v", err)
 	}
 
+	// Yangi faylni yuklash
 	return cli.CopyToContainer(context.Background(), containerName, containerPath, tarBuffer, types.CopyToContainerOptions{})
 }
 
