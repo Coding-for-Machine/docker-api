@@ -1,8 +1,10 @@
-FROM python:3.12
+FROM python:3.11-slim
 
-WORKDIR /app/language/python
-COPY . .
+# Ishchi papkani belgilaymiz
+WORKDIR /app
 
-RUN pip install -r requirements.txt
+# Yechim faylini nusxalaymiz (solution.py deb nomlangan deb faraz qilamiz)
+COPY solution.py .
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+# Konteyner ishga tushganda kodni ishga tushirish uchun buyruq
+CMD ["python", "solution.py"]
